@@ -1,0 +1,26 @@
+manifest-version = 1
+
+[component]
+name = "gosquared-components"
+slug = "gosquared-components"
+version = "0.1.0"
+category = "data-collection"
+subcategory = "analytics"
+description = """
+Description of
+the component"""
+language = "Rust"
+documentation = "https://www.edgee.cloud/docs/introduction"
+repository = "https://www.github.com/edgee-cloud/edgee"
+wit-version = "1.0.1"
+
+[component.build]
+command = "cargo build --release"
+output_path = ""
+
+[component.settings.example]
+title = "ExampleConfigField"
+type = "string"
+required = true
+description = "Here is a string"
+secret = false
