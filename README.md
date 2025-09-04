@@ -1,0 +1,1 @@
+# gosquared-component
