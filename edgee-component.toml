@@ -1,7 +1,7 @@
 manifest-version = 1
 
 [component]
-name = "example-rust-data-collection-component"
+name = "gosquared"
 version = "1.0.0"
 
 category = "data-collection"
@@ -42,8 +42,8 @@ language = "Rust"
 wit-version = "1.0.0"
 
 [component.build]
-command = "cargo build --target wasm32-wasip2 --release --target-dir ./target && rm -f ./component.wasm && mv ./target/wasm32-wasip2/release/example_rust_component.wasm ./component.wasm"
-output_path = "component.wasm"
+command = "cargo build --target wasm32-wasip2 --release --target-dir ./target && rm -f ./gosquared.wasm && mv ./target/wasm32-wasip2/release/gosquared.wasm ./gosquared.wasm"
+output_path = "gosquared.wasm"
 
 [component.settings.api_key]
 title = "GoSquared Api Key"

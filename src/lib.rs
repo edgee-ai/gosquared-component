@@ -1,9 +1,12 @@
 use crate::exports::edgee::components::data_collection::{Data, Dict, EdgeeRequest, Event, HttpMethod};
+use crate::helpers::insert_if_nonempty;
+use gosquared::{GoSquaredTrackPayload};
 use exports::edgee::components::data_collection::Guest;
 use std::collections::HashMap;
 use serde_json::json;
 mod helpers;
-use crate::helpers::insert_if_nonempty;
+mod gosquared;
+
 
 wit_bindgen::generate!({world: "data-collection", path: ".edgee/wit", generate_all});
 export!(Component);
@@ -40,65 +43,26 @@ impl Guest for Component {
 
     fn track(event: Event, settings_dict: Dict) -> Result<EdgeeRequest, String> {
         let settings = Settings::new(settings_dict).map_err(|e| e.to_string())?;
+
         let mut properties = HashMap::new();
         let mut event_name = "track".to_string();
-        let language = event
-            .context
-            .client
-            .locale
-            .split('-')
-            .next()
-            .unwrap_or("")
-            .to_string();
-
 
         if let Data::Track(data) = &event.data {
             event_name = data.name.clone();
-
             for (k, v) in &data.properties {
-                insert_if_nonempty(&mut properties, k, v);
+                let k = k.replace(" ", "_");
+                insert_if_nonempty(&mut properties, &k, v);
             }
         }
 
-        let mut payload = json!({
-            "site_token": settings.site_token,
-            "event": {
-                "name": event_name,
-                "data": properties
-            },
-            "timestamp": event.timestamp,
-            "person_id": event.context.user.user_id,
-            "visitor_id": event.context.user.anonymous_id,
-            "page": {
-                "url": event.context.page.url,
-                "title": event.context.page.title,
-            },
-            "referrer": event.context.page.referrer,
-            "ip": event.context.client.ip,
-            "user_agent": event.context.client.user_agent,
-            "screen": {
-                "height": event.context.client.screen_height,
-                "width": event.context.client.screen_width,
-                "pixel_ratio": event.context.client.screen_density,
-            },
-            "campain": {
-                "name": event.context.campaign.name,
-                "source": event.context.campaign.source,
-                "medium": event.context.campaign.medium,
-                "content": event.context.campaign.content,
-                "term": event.context.campaign.term,
-            },
-        });
-
-        if let Some(map) = payload.as_object_mut() {
-            map.insert("language".to_string(), json!(language));
-        }
+        let payload = GoSquaredTrackPayload::new(&event, event_name, properties);
+        let json_payload = serde_json::to_string(&payload).map_err(|e| e.to_string())?;
 
         Ok(EdgeeRequest {
             method: HttpMethod::Post,
             url: "https://data.gosquared.com/event".to_string(),
             headers: vec![("Content-Type".to_string(), "application/json".to_string())],
-            body: payload.to_string(),
+            body: json_payload,
             forward_client_headers: true,
         })
     }
