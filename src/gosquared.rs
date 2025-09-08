@@ -3,6 +3,30 @@ use serde::Serialize;
 use std::collections::HashMap;
 
 #[derive(Serialize, Default)]
+pub struct GoSquaredPageviewPayload {
+    visitor_id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    timestamp: Option<String>,
+    page: PageInfo,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    referrer: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    ip: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    character_set: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    language: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    user_agent: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    returning: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    screen: Option<ScreenInfo>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    campaign: Option<CampaignInfo>,
+}
+
+#[derive(Serialize, Default)]
 pub struct GoSquaredTrackPayload {
     event: GoSquaredEvent,
 
@@ -94,6 +118,7 @@ pub struct TotalInfo {
     pageviews: i32,
 }
 
+
 impl GoSquaredTrackPayload {
     pub fn new(event: &Event, event_name: String, properties: HashMap<String, String>) -> Self {
         GoSquaredTrackPayload {
@@ -127,6 +152,39 @@ impl GoSquaredTrackPayload {
                 term: event.context.campaign.term.clone(),
             }),
             ..Default::default()
+        }
+    }
+}
+
+impl GoSquaredPageviewPayload {
+    pub fn new(event: &Event) -> Self {
+        GoSquaredPageviewPayload {
+            visitor_id: event.context.user.anonymous_id.clone(),
+            timestamp: Some(event.timestamp.to_string()),
+            page: PageInfo {
+                url: event.context.page.url.clone(),
+                title: event.context.page.title.clone(),
+                ..Default::default()
+            },
+            referrer: Some(event.context.page.referrer.clone()),
+            ip: Some(event.context.client.ip.clone()),
+            language: Some(event.context.client.locale.split('-').next().unwrap_or("").to_string()),
+            user_agent: Some(event.context.client.user_agent.clone()),
+            returning: None,
+            character_set: None,
+            screen: Some(ScreenInfo {
+                height: event.context.client.screen_height,
+                width: event.context.client.screen_width,
+                pixel_ratio: Some(event.context.client.screen_density),
+                depth: None,
+            }),
+            campaign: Some(CampaignInfo {
+                name: event.context.campaign.name.clone(),
+                source: event.context.campaign.source.clone(),
+                medium: event.context.campaign.medium.clone(),
+                content: event.context.campaign.content.clone(),
+                term: event.context.campaign.term.clone(),
+            }),
         }
     }
 }

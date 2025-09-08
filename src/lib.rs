@@ -1,6 +1,6 @@
 use crate::exports::edgee::components::data_collection::{Data, Dict, EdgeeRequest, Event, HttpMethod};
 use crate::helpers::insert_if_nonempty;
-use gosquared::{GoSquaredTrackPayload};
+use gosquared::{GoSquaredTrackPayload, GoSquaredPageviewPayload};
 use exports::edgee::components::data_collection::Guest;
 use std::collections::HashMap;
 use serde_json::json;
@@ -16,27 +16,14 @@ struct Component;
 impl Guest for Component {
     fn page(event: Event, settings_dict: Dict) -> Result<EdgeeRequest, String> {
         let settings = Settings::new(settings_dict).map_err(|e| e.to_string())?;
-        let mut properties = HashMap::new();
-
-        if let Data::Page(data) = &event.data {
-            for (k, v) in &data.properties {
-                insert_if_nonempty(&mut properties, k, v);
-            }
-        }
-
-        let payload = json!({
-            "site_token": settings.site_token,
-            "event": "pageview",
-            "person_id": event.context.user.user_id,
-            "timestamp": event.timestamp,
-            "properties": properties
-        });
+        let payload = GoSquaredPageviewPayload::new(&event);
+        let json_payload = serde_json::to_string(&payload).map_err(|e| e.to_string())?;
 
         Ok(EdgeeRequest {
             method: HttpMethod::Post,
             url: "https://data.gosquared.com/event".to_string(),
             headers: vec![("Content-Type".to_string(), "application/json".to_string())],
-            body: payload.to_string(),
+            body: json_payload,
             forward_client_headers: true,
         })
     }
