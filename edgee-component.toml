@@ -1,26 +1,60 @@
 manifest-version = 1
 
 [component]
-name = "gosquared-components"
-slug = "gosquared-components"
-version = "0.1.0"
+name = "example-rust-data-collection-component"
+version = "1.0.0"
+
 category = "data-collection"
 subcategory = "analytics"
-description = """
-Description of
-the component"""
+description = '''
+## Overview
+
+Describe **what this component does** and why it exists.
+
+---
+
+## ✨ Key Features & Benefits
+
+### Features
+
+- **Feature 1**: Quick feature description.
+- **Feature 2**: Quick feature description.
+
+### Benefits
+
+- **Benefit 1**: Quick benefit description.
+- **Benefit 2**: Quick benefit description.
+
+---
+
+## 🚀️ Use Cases
+
+- **Use Case 1**: Quick use case description.
+- **Use Case 2**: Quick use case description.
+
+---
+
+Additional resources: [Resource example](https://your-resource-link.com)
+'''
+documentation = "https://github.com/edgee-cloud/example-rust-component"
+repository = "https://github.com/edgee-cloud/example-rust-component"
 language = "Rust"
-documentation = "https://www.edgee.cloud/docs/introduction"
-repository = "https://www.github.com/edgee-cloud/edgee"
-wit-version = "1.0.1"
+wit-version = "1.0.0"
 
 [component.build]
-command = "cargo build --release"
-output_path = ""
+command = "cargo build --target wasm32-wasip2 --release --target-dir ./target && rm -f ./component.wasm && mv ./target/wasm32-wasip2/release/example_rust_component.wasm ./component.wasm"
+output_path = "component.wasm"
 
-[component.settings.example]
-title = "ExampleConfigField"
+[component.settings.api_key]
+title = "GoSquared Api Key"
 type = "string"
 required = true
-description = "Here is a string"
-secret = false
+description = "Your GoSquared Api Key"
+secret = true
+
+[component.settings.site_token]
+title = "GoSquared Site Token"
+type = "string"
+required = true
+description = "Your GoSquared project token (starts with GSN-...)"
+secret = true
