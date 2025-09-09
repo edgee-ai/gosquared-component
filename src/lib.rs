@@ -1,9 +1,10 @@
 use crate::exports::edgee::components::data_collection::{Data, Dict, EdgeeRequest, Event, HttpMethod};
 use crate::helpers::insert_if_nonempty;
+use crate::gosquared::GoSquaredIdentifyPayload;
 use gosquared::{GoSquaredTrackPayload, GoSquaredPageviewPayload};
 use exports::edgee::components::data_collection::Guest;
 use std::collections::HashMap;
-use serde_json::json;
+use serde::Serialize;
 mod helpers;
 mod gosquared;
 
@@ -15,22 +16,11 @@ struct Component;
 
 impl Guest for Component {
     fn page(event: Event, settings_dict: Dict) -> Result<EdgeeRequest, String> {
-        let settings = Settings::new(settings_dict).map_err(|e| e.to_string())?;
         let payload = GoSquaredPageviewPayload::new(&event);
-        let json_payload = serde_json::to_string(&payload).map_err(|e| e.to_string())?;
-
-        Ok(EdgeeRequest {
-            method: HttpMethod::Post,
-            url: "https://data.gosquared.com/event".to_string(),
-            headers: vec![("Content-Type".to_string(), "application/json".to_string())],
-            body: json_payload,
-            forward_client_headers: true,
-        })
+        common("https://api.gosquared.com/pageview", &payload, settings_dict)
     }
 
     fn track(event: Event, settings_dict: Dict) -> Result<EdgeeRequest, String> {
-        let settings = Settings::new(settings_dict).map_err(|e| e.to_string())?;
-
         let mut properties = HashMap::new();
         let mut event_name = "track".to_string();
 
@@ -43,38 +33,13 @@ impl Guest for Component {
         }
 
         let payload = GoSquaredTrackPayload::new(&event, event_name, properties);
-        let json_payload = serde_json::to_string(&payload).map_err(|e| e.to_string())?;
-
-        Ok(EdgeeRequest {
-            method: HttpMethod::Post,
-            url: "https://data.gosquared.com/event".to_string(),
-            headers: vec![("Content-Type".to_string(), "application/json".to_string())],
-            body: json_payload,
-            forward_client_headers: true,
-        })
+        common("https://api.gosquared.com/event", &payload, settings_dict)
     }
 
     fn user(event: Event, settings_dict: Dict) -> Result<EdgeeRequest, String> {
-        let settings = Settings::new(settings_dict).map_err(|e| e.to_string())?;
-        let mut properties = HashMap::new();
+        let payload = GoSquaredIdentifyPayload::new(&event);
 
-        for (k, v) in &event.context.user.properties {
-            insert_if_nonempty(&mut properties, k, v);
-        }
-
-        let payload = json!({
-            "site_token": settings.site_token,
-            "person_id": event.context.user.user_id,
-            "properties": properties
-        });
-
-        Ok(EdgeeRequest {
-            method: HttpMethod::Post,
-            url: "https://data.gosquared.com/identify".to_string(),
-            headers: vec![("Content-Type".to_string(), "application/json".to_string())],
-            body: payload.to_string(),
-            forward_client_headers: true,
-        })
+        common("https://api.gosquared.com/identify", &payload, settings_dict)
     }
 }
 
@@ -104,4 +69,28 @@ impl Settings {
 
         Ok(Self { api_key, site_token })
     }
+}
+
+pub fn common<T: Serialize>(
+    endpoint: &str,
+    payload: &T,
+    settings_dict: Dict,
+) -> Result<EdgeeRequest, String> {
+    let settings = Settings::new(settings_dict).map_err(|e| e.to_string())?;
+    let json_payload = serde_json::to_string(payload).map_err(|e| e.to_string())?;
+
+    let url = format!(
+        "{}?api_key={}&site_token={}",
+        endpoint,
+        settings.api_key,
+        settings.site_token
+    );
+
+    Ok(EdgeeRequest {
+        method: HttpMethod::Post,
+        url,
+        headers: vec![("Content-Type".into(), "application/json".into())],
+        body: json_payload,
+        forward_client_headers: true,
+    })
 }

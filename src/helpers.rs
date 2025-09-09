@@ -1,8 +1,34 @@
+use crate::exports::edgee::components::data_collection::Event;
+use crate::gosquared::{ScreenInfo, CampaignInfo};
 use std::collections::HashMap;
+
 
 pub fn insert_if_nonempty(map: &mut HashMap<String, String>, key: &str, value: &str) {
     if !value.trim().is_empty() {
         map.insert(key.to_string(), value.to_string());
+    }
+}
+
+pub fn parse_language(locale: &str) -> Option<String> {
+    locale.split('-').next().map(|s| s.to_string())
+}
+
+pub fn screen_from_event(event: &Event) -> ScreenInfo {
+    ScreenInfo {
+        height: event.context.client.screen_height,
+        width: event.context.client.screen_width,
+        pixel_ratio: Some(event.context.client.screen_density),
+        depth: None,
+    }
+}
+
+pub fn campaign_from_event(event: &Event) -> CampaignInfo {
+    CampaignInfo {
+        name: event.context.campaign.name.clone(),
+        source: event.context.campaign.source.clone(),
+        medium: event.context.campaign.medium.clone(),
+        content: event.context.campaign.content.clone(),
+        term: event.context.campaign.term.clone(),
     }
 }
 

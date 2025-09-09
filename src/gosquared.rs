@@ -1,6 +1,19 @@
 use crate::exports::edgee::components::data_collection::Event;
 use serde::Serialize;
 use std::collections::HashMap;
+use crate::helpers::{parse_language, screen_from_event, campaign_from_event};
+
+
+#[derive(Serialize, Default)]
+pub struct GoSquaredIdentifyPayload {
+    pub person_id: String,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub visitor_id: Option<String>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub properties: Option<GoSquaredUserProperties>,
+}
 
 #[derive(Serialize, Default)]
 pub struct GoSquaredPageviewPayload {
@@ -77,6 +90,60 @@ pub struct GoSquaredTrackPayload {
 }
 
 #[derive(Serialize, Default)]
+pub struct GoSquaredUserProperties {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub email: Option<String>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub status: Option<String>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub first_name: Option<String>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub last_name: Option<String>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub username: Option<String>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub avatar: Option<String>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub phone: Option<String>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub created_at: Option<String>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub company: Option<GoSquaredCompany>,
+
+    #[serde(skip_serializing_if = "HashMap::is_empty")]
+    pub custom: HashMap<String, String>,
+}
+
+#[derive(Serialize, Default, PartialEq)]
+pub struct GoSquaredCompany {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub size: Option<u32>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub industry: Option<String>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub position: Option<String>,
+}
+
+#[derive(Serialize, Default)]
 pub struct GoSquaredEvent {
     name: String,
     data: HashMap<String, String>,
@@ -92,19 +159,19 @@ pub struct PageInfo {
 
 #[derive(Serialize, Default)]
 pub struct ScreenInfo {
-    height: i32,
-    width: i32,
-    pixel_ratio: Option<f32>,
-    depth: Option<f64>,
+    pub height: i32,
+    pub width: i32,
+    pub pixel_ratio: Option<f32>,
+    pub depth: Option<f64>,
 }
 
 #[derive(Serialize, Default)]
 pub struct CampaignInfo {
-    name: String,
-    source: String,
-    medium: String,
-    content: String,
-    term: String,
+    pub name: String,
+    pub source: String,
+    pub medium: String,
+    pub content: String,
+    pub term: String,
 }
 
 #[derive(Serialize, Default)]
@@ -132,25 +199,14 @@ impl GoSquaredTrackPayload {
             referrer: Some(event.context.page.referrer.clone()),
             ip: Some(event.context.client.ip.clone()),
             user_agent: Some(event.context.client.user_agent.clone()),
-            language: Some(event.context.client.locale.split('-').next().unwrap_or("").to_string()),
+            language: parse_language(&event.context.client.locale),
             page: Some(PageInfo {
                 url: event.context.page.url.clone(),
                 title: event.context.page.title.clone(),
                 ..Default::default()
             }),
-            screen: Some(ScreenInfo {
-                height: event.context.client.screen_height,
-                width: event.context.client.screen_width,
-                pixel_ratio: Some(event.context.client.screen_density),
-                depth: None,
-            }),
-            campaign: Some(CampaignInfo {
-                name: event.context.campaign.name.clone(),
-                source: event.context.campaign.source.clone(),
-                medium: event.context.campaign.medium.clone(),
-                content: event.context.campaign.content.clone(),
-                term: event.context.campaign.term.clone(),
-            }),
+            screen: Some(screen_from_event(event)),
+            campaign: Some(campaign_from_event(event)),
             ..Default::default()
         }
     }
@@ -168,23 +224,60 @@ impl GoSquaredPageviewPayload {
             },
             referrer: Some(event.context.page.referrer.clone()),
             ip: Some(event.context.client.ip.clone()),
-            language: Some(event.context.client.locale.split('-').next().unwrap_or("").to_string()),
+            language: parse_language(&event.context.client.locale),
             user_agent: Some(event.context.client.user_agent.clone()),
             returning: None,
             character_set: None,
-            screen: Some(ScreenInfo {
-                height: event.context.client.screen_height,
-                width: event.context.client.screen_width,
-                pixel_ratio: Some(event.context.client.screen_density),
-                depth: None,
-            }),
-            campaign: Some(CampaignInfo {
-                name: event.context.campaign.name.clone(),
-                source: event.context.campaign.source.clone(),
-                medium: event.context.campaign.medium.clone(),
-                content: event.context.campaign.content.clone(),
-                term: event.context.campaign.term.clone(),
-            }),
+            screen: Some(screen_from_event(event)),
+            campaign: Some(campaign_from_event(event)),
+        }
+    }
+}
+
+impl GoSquaredIdentifyPayload {
+    pub fn new(event: &Event) -> Self {
+        let mut custom = HashMap::new();
+        let mut company = GoSquaredCompany::default();
+        let mut props = GoSquaredUserProperties::default();
+
+        for (key, value) in &event.context.user.properties {
+            match key.as_str() {
+                "email" => props.email = Some(value.clone()),
+                "status" => props.status = Some(value.clone()),
+                "name" => props.name = Some(value.clone()),
+                "first_name" => props.first_name = Some(value.clone()),
+                "last_name" => props.last_name = Some(value.clone()),
+                "username" => props.username = Some(value.clone()),
+                "avatar" => props.avatar = Some(value.clone()),
+                "description" => props.description = Some(value.clone()),
+                "phone" => props.phone = Some(value.clone()),
+                "created_at" => props.created_at = Some(value.clone()),
+
+                "company.name" => company.name = Some(value.clone()),
+                "company.industry" => company.industry = Some(value.clone()),
+                "company.position" => company.position = Some(value.clone()),
+                "company.size" => {
+                    if let Ok(parsed) = value.parse::<u32>() {
+                        company.size = Some(parsed);
+                    }
+                }
+
+                _ => {
+                    custom.insert(key.clone(), value.clone());
+                }
+            }
+        }
+
+        if company != GoSquaredCompany::default() {
+            props.company = Some(company);
+        }
+
+        props.custom = custom;
+
+        GoSquaredIdentifyPayload {
+            person_id: event.context.user.user_id.clone(),
+            visitor_id: Some(event.context.user.anonymous_id.clone()),
+            properties: Some(props),
         }
     }
 }
