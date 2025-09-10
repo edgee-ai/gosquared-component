@@ -217,10 +217,10 @@ impl GoSquaredPageviewPayload {
             let anonymous = event.context.user.anonymous_id.trim();
             let user = event.context.user.user_id.trim();
 
-            if !anonymous.is_empty() {
-                anonymous.to_string()
-            } else if !user.is_empty() {
+            if !user.is_empty() {
                 user.to_string()
+            } else if !anonymous.is_empty() {
+                anonymous.to_string()
             } else {
                 "unknown".to_string()
             }
