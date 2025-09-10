@@ -108,3 +108,55 @@ pub fn common<T: Serialize>(
         forward_client_headers: true,
     })
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::exports::edgee::components::data_collection::Dict;
+
+    fn fake_dict() -> Dict {
+        Dict::from_iter(vec![
+            ("api_key".to_string(), "test_key".to_string()),
+            ("site_token".to_string(), "test_token".to_string()),
+        ])
+    }
+
+    #[test]
+    fn settings_new_valid_input() {
+        let dict = fake_dict();
+        let settings = Settings::new(dict).unwrap();
+        assert_eq!(settings.api_key, "test_key");
+        assert_eq!(settings.site_token, "test_token");
+    }
+
+    #[test]
+    fn settings_missing_api_key() {
+        let dict = Dict::from_iter(vec![("site_token".to_string(), "test_token".to_string())]);
+        let result = Settings::new(dict);
+        assert!(result.is_err());
+    }
+
+    #[derive(Serialize)]
+    struct DummyPayload {
+        test_key: String,
+    }
+
+    #[test]
+    fn common_creates_valid_request() {
+        let dict = Dict::from_iter(vec![
+            ("api_key".to_string(), "abc123".to_string()),
+            ("site_token".to_string(), "xyz456".to_string()),
+        ]);
+
+        let payload = DummyPayload {
+            test_key: "test_vaue".to_string(),
+        };
+
+        let req = common("https://api.test.com/track", &payload, dict).unwrap();
+
+        assert!(req.url.contains("https://api.test.com/track?api_key=abc123&site_token=xyz456"));
+        assert_eq!(req.method, HttpMethod::Post);
+        assert!(req.body.contains("\"test_key\":\"test_vaue\""));
+    }
+}
+
