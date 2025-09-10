@@ -162,7 +162,6 @@ pub struct ScreenInfo {
     pub height: i32,
     pub width: i32,
     pub pixel_ratio: Option<f32>,
-    pub depth: Option<f64>,
 }
 
 #[derive(Serialize, Default)]
@@ -214,8 +213,21 @@ impl GoSquaredTrackPayload {
 
 impl GoSquaredPageviewPayload {
     pub fn new(event: &Event) -> Self {
+        let visitor_id = {
+            let anonymous = event.context.user.anonymous_id.trim();
+            let user = event.context.user.user_id.trim();
+
+            if !anonymous.is_empty() {
+                anonymous.to_string()
+            } else if !user.is_empty() {
+                user.to_string()
+            } else {
+                "unknown".to_string()
+            }
+        };
+
         GoSquaredPageviewPayload {
-            visitor_id: event.context.user.anonymous_id.clone(),
+            visitor_id,
             timestamp: Some(event.timestamp.to_string()),
             page: PageInfo {
                 url: event.context.page.url.clone(),

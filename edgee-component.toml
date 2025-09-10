@@ -2,14 +2,15 @@ manifest-version = 1
 
 [component]
 name = "gosquared"
-version = "1.0.0"
+version = "1.0.1"
 
 category = "data-collection"
 subcategory = "analytics"
 description = '''
 ## Overview
 
-Describe **what this component does** and why it exists.
+The **GoSquared** component by Edgee enables seamless server-side analytics by sending events, page views, and user profiles directly to GoSquared's HTTP API from the edge.
+Built with performance and reliability in mind, it leverages Edgee's WebAssembly runtime to handle analytics events efficiently, without relying on browser SDKs.
 
 ---
 
@@ -17,29 +18,37 @@ Describe **what this component does** and why it exists.
 
 ### Features
 
-- **Feature 1**: Quick feature description.
-- **Feature 2**: Quick feature description.
+- **Multi-Event Support**: Supports `track`, `page`, and `user` events for complete analytics coverage.
+- **GoSquared HTTP API Integration**: Interfaces directly with GoSquared's `/event`, `/pageview`, and `/identify` endpoints.
+- **Wasm Performance**: Implemented in Rust and compiled to WebAssembly for optimal execution at the edge.
+- **Context-Aware Enrichment**: Automatically enriches events with screen, IP, referrer, campaign, and user data.
+- **Dynamic Field Mapping**: Maps Edgee data layer fields to GoSquared’s expected schema, including nested `company` fields.
 
 ### Benefits
 
-- **Benefit 1**: Quick benefit description.
-- **Benefit 2**: Quick benefit description.
+- **Accurate Tracking**: Achieve high-fidelity analytics with server-side event delivery.
+- **Fast & Lightweight**: Eliminate the need for client-side SDKs; faster loading times and simpler deployments.
+- **Reliable Identification**: Identify users with rich profile data and support for custom traits.
+- **Edge-Native**: Designed to run at the edge for reduced latency and scalable analytics.
 
 ---
 
 ## 🚀️ Use Cases
 
-- **Use Case 1**: Quick use case description.
-- **Use Case 2**: Quick use case description.
+- **Real-Time Analytics**: Send precise interaction and behavior data to GoSquared without relying on client-side libraries.
+- **Page View Monitoring**: Capture page views with full context in statically rendered or headless apps.
+- **User Profile Sync**: Keep GoSquared in sync with your user CRM or backend identifiers.
+- **Privacy-Aware Tracking**: Process sensitive data server-side, where you have more control.
 
 ---
 
-Additional resources: [Resource example](https://your-resource-link.com)
+Additional resources: [GoSquared HTTP Tracking Docs](https://www.gosquared.com/docs/tracking/overview)
 '''
-documentation = "https://github.com/edgee-cloud/example-rust-component"
-repository = "https://github.com/edgee-cloud/example-rust-component"
+documentation = "https://www.gosquared.com/docs/tracking/http"
+repository = "https://github.com/edgee-cloud/gosquared-component"
 language = "Rust"
 wit-version = "1.0.0"
+icon-path = "gosquared.png"
 
 [component.build]
 command = "cargo build --target wasm32-wasip2 --release --target-dir ./target && rm -f ./gosquared.wasm && mv ./target/wasm32-wasip2/release/gosquared.wasm ./gosquared.wasm"
@@ -53,7 +62,7 @@ description = "Your GoSquared Api Key"
 secret = true
 
 [component.settings.site_token]
-title = "GoSquared Site Token"
+title = "GoSquared Project Token"
 type = "string"
 required = true
 description = "Your GoSquared project token (starts with GSN-...)"

@@ -17,7 +17,7 @@ struct Component;
 impl Guest for Component {
     fn page(event: Event, settings_dict: Dict) -> Result<EdgeeRequest, String> {
         let payload = GoSquaredPageviewPayload::new(&event);
-        common("https://api.gosquared.com/pageview", &payload, settings_dict)
+        common("https://api.gosquared.com/tracking/v1/pageview", &payload, settings_dict)
     }
 
     fn track(event: Event, settings_dict: Dict) -> Result<EdgeeRequest, String> {
@@ -33,13 +33,13 @@ impl Guest for Component {
         }
 
         let payload = GoSquaredTrackPayload::new(&event, event_name, properties);
-        common("https://api.gosquared.com/event", &payload, settings_dict)
+        common("https://api.gosquared.com/tracking/v1/event", &payload, settings_dict)
     }
 
     fn user(event: Event, settings_dict: Dict) -> Result<EdgeeRequest, String> {
         let payload = GoSquaredIdentifyPayload::new(&event);
 
-        common("https://api.gosquared.com/identify", &payload, settings_dict)
+        common("https://api.gosquared.com/tracking/v1/identify", &payload, settings_dict)
     }
 }
 

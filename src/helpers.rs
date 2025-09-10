@@ -18,7 +18,6 @@ pub fn screen_from_event(event: &Event) -> ScreenInfo {
         height: event.context.client.screen_height,
         width: event.context.client.screen_width,
         pixel_ratio: Some(event.context.client.screen_density),
-        depth: None,
     }
 }
 
