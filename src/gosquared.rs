@@ -1,8 +1,7 @@
 use crate::exports::edgee::components::data_collection::Event;
+use crate::helpers::{campaign_from_event, parse_language, screen_from_event};
 use serde::Serialize;
 use std::collections::HashMap;
-use crate::helpers::{parse_language, screen_from_event, campaign_from_event};
-
 
 #[derive(Serialize, Default)]
 pub struct GoSquaredIdentifyPayload {
@@ -183,7 +182,6 @@ pub struct TotalInfo {
     visits: i32,
     pageviews: i32,
 }
-
 
 impl GoSquaredTrackPayload {
     pub fn new(event: &Event, event_name: String, properties: HashMap<String, String>) -> Self {

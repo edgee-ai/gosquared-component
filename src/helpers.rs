@@ -1,7 +1,6 @@
 use crate::exports::edgee::components::data_collection::Event;
-use crate::gosquared::{ScreenInfo, CampaignInfo};
+use crate::gosquared::{CampaignInfo, ScreenInfo};
 use std::collections::HashMap;
-
 
 pub fn insert_if_nonempty(map: &mut HashMap<String, String>, key: &str, value: &str) {
     if !value.trim().is_empty() {

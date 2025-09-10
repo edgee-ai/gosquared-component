@@ -1,13 +1,14 @@
-use crate::exports::edgee::components::data_collection::{Data, Dict, EdgeeRequest, Event, HttpMethod};
-use crate::helpers::insert_if_nonempty;
+use crate::exports::edgee::components::data_collection::{
+    Data, Dict, EdgeeRequest, Event, HttpMethod,
+};
 use crate::gosquared::GoSquaredIdentifyPayload;
-use gosquared::{GoSquaredTrackPayload, GoSquaredPageviewPayload};
+use crate::helpers::insert_if_nonempty;
 use exports::edgee::components::data_collection::Guest;
-use std::collections::HashMap;
+use gosquared::{GoSquaredPageviewPayload, GoSquaredTrackPayload};
 use serde::Serialize;
-mod helpers;
+use std::collections::HashMap;
 mod gosquared;
-
+mod helpers;
 
 wit_bindgen::generate!({world: "data-collection", path: ".edgee/wit", generate_all});
 export!(Component);
@@ -17,7 +18,11 @@ struct Component;
 impl Guest for Component {
     fn page(event: Event, settings_dict: Dict) -> Result<EdgeeRequest, String> {
         let payload = GoSquaredPageviewPayload::new(&event);
-        common("https://api.gosquared.com/tracking/v1/pageview", &payload, settings_dict)
+        common(
+            "https://api.gosquared.com/tracking/v1/pageview",
+            &payload,
+            settings_dict,
+        )
     }
 
     fn track(event: Event, settings_dict: Dict) -> Result<EdgeeRequest, String> {
@@ -33,13 +38,21 @@ impl Guest for Component {
         }
 
         let payload = GoSquaredTrackPayload::new(&event, event_name, properties);
-        common("https://api.gosquared.com/tracking/v1/event", &payload, settings_dict)
+        common(
+            "https://api.gosquared.com/tracking/v1/event",
+            &payload,
+            settings_dict,
+        )
     }
 
     fn user(event: Event, settings_dict: Dict) -> Result<EdgeeRequest, String> {
         let payload = GoSquaredIdentifyPayload::new(&event);
 
-        common("https://api.gosquared.com/tracking/v1/identify", &payload, settings_dict)
+        common(
+            "https://api.gosquared.com/tracking/v1/identify",
+            &payload,
+            settings_dict,
+        )
     }
 }
 
@@ -67,7 +80,10 @@ impl Settings {
             .ok_or_else(|| anyhow::anyhow!("Missing 'site_token'"))?
             .to_string();
 
-        Ok(Self { api_key, site_token })
+        Ok(Self {
+            api_key,
+            site_token,
+        })
     }
 }
 
@@ -81,9 +97,7 @@ pub fn common<T: Serialize>(
 
     let url = format!(
         "{}?api_key={}&site_token={}",
-        endpoint,
-        settings.api_key,
-        settings.site_token
+        endpoint, settings.api_key, settings.site_token
     );
 
     Ok(EdgeeRequest {
