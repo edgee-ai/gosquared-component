@@ -154,9 +154,10 @@ mod tests {
 
         let req = common("https://api.test.com/track", &payload, dict).unwrap();
 
-        assert!(req.url.contains("https://api.test.com/track?api_key=abc123&site_token=xyz456"));
+        assert!(req
+            .url
+            .contains("https://api.test.com/track?api_key=abc123&site_token=xyz456"));
         assert_eq!(req.method, HttpMethod::Post);
         assert!(req.body.contains("\"test_key\":\"test_vaue\""));
     }
 }
-
