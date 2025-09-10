@@ -2,7 +2,7 @@ manifest-version = 1
 
 [component]
 name = "gosquared"
-version = "1.0.1"
+version = "1.0.2"
 
 category = "data-collection"
 subcategory = "analytics"
