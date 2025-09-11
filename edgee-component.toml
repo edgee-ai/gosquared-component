@@ -58,7 +58,7 @@ output_path = "gosquared.wasm"
 title = "GoSquared Api Key"
 type = "string"
 required = true
-description = "Your GoSquared Api Key"
+description = "Your GoSquared API Key"
 secret = true
 
 [component.settings.site_token]
