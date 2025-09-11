@@ -44,7 +44,7 @@ Built with performance and reliability in mind, it leverages Edgee's WebAssembly
 
 Additional resources: [GoSquared HTTP Tracking Docs](https://www.gosquared.com/docs/tracking/overview)
 '''
-documentation = "https://www.gosquared.com/docs/tracking/http"
+documentation = "https://www.edgee.cloud/docs/components/data-collection/gosquared"
 repository = "https://github.com/edgee-cloud/gosquared-component"
 language = "Rust"
 wit-version = "1.0.0"
