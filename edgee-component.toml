@@ -66,4 +66,4 @@ title = "GoSquared Project Token"
 type = "string"
 required = true
 description = "Your GoSquared project token (starts with GSN-...)"
-secret = true
+secret = false

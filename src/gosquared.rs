@@ -1,7 +1,8 @@
 use crate::exports::edgee::components::data_collection::Event;
-use crate::helpers::{campaign_from_event, parse_language, screen_from_event};
+use crate::helpers::{campaign_from_event, parse_language, screen_from_event, timezone_offset_from_string};
 use serde::Serialize;
 use std::collections::HashMap;
+use crate::helpers::format_last_seen_as_iso;
 
 #[derive(Serialize, Default)]
 pub struct GoSquaredIdentifyPayload {
@@ -179,8 +180,8 @@ pub struct LocationInfo {
 
 #[derive(Serialize, Default)]
 pub struct TotalInfo {
-    visits: i32,
-    pageviews: i32,
+    pub visits: i32,
+    pub pageviews: i32,
 }
 
 impl GoSquaredTrackPayload {
@@ -204,6 +205,15 @@ impl GoSquaredTrackPayload {
             }),
             screen: Some(screen_from_event(event)),
             campaign: Some(campaign_from_event(event)),
+            last_pageview: format_last_seen_as_iso(event.context.session.last_seen),
+            total: Some(TotalInfo {
+                visits: event.context.session.session_count as i32,
+                ..Default::default()
+            }),
+            character_set: None,
+            location: timezone_offset_from_string(&event.context.client.timezone)
+                .map(|offset| LocationInfo { timezone_offset: offset }),
+            returning: Some(event.context.session.first_seen != 0),
             ..Default::default()
         }
     }
@@ -236,7 +246,7 @@ impl GoSquaredPageviewPayload {
             ip: Some(event.context.client.ip.clone()),
             language: parse_language(&event.context.client.locale),
             user_agent: Some(event.context.client.user_agent.clone()),
-            returning: None,
+            returning: Some(event.context.session.first_seen != 0),
             character_set: None,
             screen: Some(screen_from_event(event)),
             campaign: Some(campaign_from_event(event)),
