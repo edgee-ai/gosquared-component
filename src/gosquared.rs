@@ -1,8 +1,10 @@
 use crate::exports::edgee::components::data_collection::Event;
-use crate::helpers::{campaign_from_event, parse_language, screen_from_event, timezone_offset_from_string};
+use crate::helpers::format_last_seen_as_iso;
+use crate::helpers::{
+    campaign_from_event, parse_language, screen_from_event, timezone_offset_from_string,
+};
 use serde::Serialize;
 use std::collections::HashMap;
-use crate::helpers::format_last_seen_as_iso;
 
 #[derive(Serialize, Default)]
 pub struct GoSquaredIdentifyPayload {
@@ -211,10 +213,12 @@ impl GoSquaredTrackPayload {
                 ..Default::default()
             }),
             character_set: None,
-            location: timezone_offset_from_string(&event.context.client.timezone)
-                .map(|offset| LocationInfo { timezone_offset: offset }),
+            location: timezone_offset_from_string(&event.context.client.timezone).map(|offset| {
+                LocationInfo {
+                    timezone_offset: offset,
+                }
+            }),
             returning: Some(event.context.session.first_seen != 0),
-            ..Default::default()
         }
     }
 }
