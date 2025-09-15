@@ -1,6 +1,39 @@
 use crate::exports::edgee::components::data_collection::Event;
 use crate::gosquared::{CampaignInfo, ScreenInfo};
+use chrono::offset::Offset;
+use chrono::{DateTime, TimeZone, Utc};
+use chrono_tz::Tz;
 use std::collections::HashMap;
+
+pub fn timezone_offset_from_string(tz_string: &str) -> Option<i32> {
+    if let Ok(tz) = tz_string.parse::<Tz>() {
+        let now = Utc::now();
+        let offset = tz
+            .offset_from_utc_datetime(&now.naive_utc())
+            .fix()
+            .local_minus_utc();
+        return Some(offset / 60); // Offset in minutes
+    }
+
+    if let Some(offset_str) = tz_string.strip_prefix("UTC") {
+        if let Ok(offset_hours) = offset_str.parse::<i32>() {
+            return Some(offset_hours * 60);
+        }
+        if offset_str.starts_with('+') || offset_str.starts_with('-') {
+            return offset_str.parse::<i32>().ok().map(|h| h * 60);
+        }
+    }
+
+    None
+}
+
+pub fn format_last_seen_as_iso(last_seen: i64) -> Option<String> {
+    if last_seen <= 0 {
+        return None;
+    }
+
+    DateTime::from_timestamp(last_seen, 0).map(|dt| dt.to_rfc3339())
+}
 
 pub fn insert_if_nonempty(map: &mut HashMap<String, String>, key: &str, value: &str) {
     if !value.trim().is_empty() {
