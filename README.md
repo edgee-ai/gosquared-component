@@ -1,9 +1,9 @@
 <div align="center">
 <p align="center">
-  <a href="https://www.edgee.cloud">
+  <a href="https://www.edgee.ai">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://cdn.edgee.cloud/img/component-dark.svg">
-      <img src="https://cdn.edgee.cloud/img/component.svg" height="100" alt="Edgee">
+      <source media="(prefers-color-scheme: dark)" srcset="https://cdn.edgee.ai/img/component-dark.svg">
+      <img src="https://cdn.edgee.ai/img/component.svg" height="100" alt="Edgee">
     </picture>
   </a>
 </p>
@@ -11,9 +11,9 @@
 
 <h1 align="center">GoSquared component for Edgee</h1>
 
-[![Coverage Status](https://coveralls.io/repos/github/edgee-cloud/gosquared-component/badge.svg)](https://coveralls.io/github/edgee-cloud/gosquared-component)
-[![GitHub issues](https://img.shields.io/github/issues/edgee-cloud/gosquared-component.svg)](https://github.com/edgee-cloud/gosquared-component/issues)
-[![Edgee Component Registry](https://img.shields.io/badge/Edgee_Component_Registry-Public-green.svg)](https://www.edgee.cloud/edgee/gosquared)
+[![Coverage Status](https://coveralls.io/repos/github/edgee-ai/gosquared-component/badge.svg)](https://coveralls.io/github/edgee-ai/gosquared-component)
+[![GitHub issues](https://img.shields.io/github/issues/edgee-ai/gosquared-component.svg)](https://github.com/edgee-ai/gosquared-component/issues)
+[![Edgee Component Registry](https://img.shields.io/badge/Edgee_Component_Registry-Public-green.svg)](https://www.edgee.ai/edgee/gosquared)
 
 This is a Rust-based Edgee component that integrates **GoSquared analytics** using the Edgee Data Collection protocol. It enables you to track events, monitor page views, and identify users—sending data to GoSquared via their `/event`, `/pageview`, and `/identify` endpoints.
 
@@ -86,4 +86,4 @@ gosquared-component/
 ### 📚 Learn More
 
 - [GoSquared HTTP Tracking Docs](https://www.gosquared.com/docs/tracking/overview)
-- [Edgee Developer Guide](https://www.edgee.cloud/docs/services/registry/developer-guide)
+- [Edgee Developer Guide](https://www.edgee.ai/docs/services/registry/developer-guide)
